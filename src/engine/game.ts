@@ -156,6 +156,8 @@ export class Game {
   private fx: Fx[] = [];
   private flickers: { light: THREE.PointLight; base: number; phase: number }[] = [];
   private tipsShown = new Set<string>();
+  private mapImg: HTMLCanvasElement | null = null;
+  private miniT = 0;
 
   // loop/input
   private keys = new Set<string>();
@@ -503,7 +505,7 @@ export class Game {
     for (const d of this.doors) {
       if (d.open) continue;
       const c = center(d.cell);
-      if (Math.hypot(c.x - this.pos.x, c.z - this.pos.z) < 3.2) return { kind: 'door', d };
+      if (Math.hypot(c.x - this.pos.x, c.z - this.pos.z) < 3.8) return { kind: 'door', d };
     }
     for (const l of this.lamps) if (Math.hypot(l.pos.x - this.pos.x, l.pos.z - this.pos.z) < 2.6) return { kind: 'lamp', l };
     return null;
@@ -789,6 +791,7 @@ export class Game {
       if (isIntact(t.q)) this.uplink = Math.min(t.uplink, this.uplink + dt);
       return;
     }
+    if (t.reencodeT > 0) { if (t.readHold > 0.5) this.tipOnce('corruptRead', `${t.label} is corrupted — the code on it is noise until it re-encodes.`); return; }
     if (t.readHold >= 0.9 && !sameCode(t.known, r.outcomes)) {
       t.known = r.outcomes.slice();
       this.sfx.pickup();
@@ -1022,7 +1025,88 @@ export class Game {
     this.renderer.render(this.vmScene, this.vmCamera);
     const hs = this.hudState(scoped);
     this.hud.update(hs, dt);
+    this.miniT -= dt || 0.016;
+    if (this.miniT <= 0) { this.miniT = 0.06; this.drawMinimap(); }
     this.music.update(dt, hs.danger, this.hp);
+  }
+
+  private targetPos(): Point | null {
+    const st = this.step;
+    if (!st) return null;
+    if (st.exit) return this.exitPos;
+    const t = st.target;
+    if (!t) return null;
+    if (t.startsWith('m:')) return this.map.markers[t.slice(2)] ?? null;
+    const i = Number(t.slice(1));
+    if (t[0] === 't') return this.terms[i]?.pos ?? null;
+    if (t[0] === 'd') { const d = this.doors[i]; return d ? center(d.cell) : null; }
+    if (t[0] === 'l') return this.lamps[i]?.pos ?? null;
+    return null;
+  }
+
+  private drawMinimap(): void {
+    const cv = this.hud.minimap;
+    const g = cv.getContext('2d');
+    if (!g) return;
+    const K = 2.6; // px per metre
+    if (!this.mapImg) {
+      this.mapImg = document.createElement('canvas');
+      this.mapImg.width = this.map.w * TILE * K; this.mapImg.height = this.map.h * TILE * K;
+      const m = this.mapImg.getContext('2d')!;
+      m.fillStyle = 'rgba(20,18,16,0.9)'; m.fillRect(0, 0, this.mapImg.width, this.mapImg.height);
+      for (let y = 0; y < this.map.h; y++) for (let x = 0; x < this.map.w; x++) {
+        if (this.map.solid[y * this.map.w + x] && !this.map.doors.some(d => d.x === x && d.y === y)) continue;
+        m.fillStyle = '#4b463f';
+        m.fillRect(x * TILE * K, y * TILE * K, TILE * K + 0.5, TILE * K + 0.5);
+      }
+    }
+    const W = cv.width, R = W / 2;
+    g.clearRect(0, 0, W, W);
+    g.save();
+    g.translate(R, R);
+    g.rotate(this.yaw);
+    g.translate(-this.pos.x * K, -this.pos.z * K);
+    g.drawImage(this.mapImg, 0, 0);
+    for (const d of this.doors) {
+      const c = center(d.cell);
+      g.fillStyle = d.open ? '#2a6a3a' : '#c9a227';
+      g.fillRect((c.x - 1) * K, (c.z - 1) * K, TILE * K, TILE * K);
+    }
+    for (const t of this.terms) { g.fillStyle = '#3de8ff'; g.fillRect((t.pos.x - 1) * K, (t.pos.z - 1) * K, TILE * K, TILE * K); }
+    for (const l of this.lamps) {
+      g.fillStyle = l.basis === 'Z' ? '#ffb347' : '#3de8ff';
+      g.globalAlpha = l.on ? 0.25 : 0.0;
+      g.beginPath(); g.arc(l.pos.x * K, l.pos.z * K, 7.5 * K, 0, Math.PI * 2); g.fill();
+      g.globalAlpha = 1;
+      g.beginPath(); g.arc(l.pos.x * K, l.pos.z * K, 3, 0, Math.PI * 2); g.fill();
+    }
+    for (const z of this.zombies) {
+      const e = eigen(z.theta);
+      if (Math.hypot(z.x - this.pos.x, z.z - this.pos.z) > 30) continue;
+      g.fillStyle = e === 'alive' ? '#ff2a2a' : e === 'dead' ? '#5a3a36' : e === 'minus' ? '#b36bff' : '#2ef2c8';
+      g.beginPath(); g.arc(z.x * K, z.z * K, e === 'dead' ? 2 : 2.6, 0, Math.PI * 2); g.fill();
+    }
+    g.restore();
+    // objective marker (clamped to the rim)
+    const tp = this.targetPos();
+    if (tp) {
+      const dx = (tp.x - this.pos.x) * K, dz = (tp.z - this.pos.z) * K;
+      const c = Math.cos(this.yaw), sn = Math.sin(this.yaw);
+      let sx = dx * c - dz * sn, sy = dx * sn + dz * c;
+      const d = Math.hypot(sx, sy);
+      const pulse = 0.6 + 0.4 * Math.sin(this.time * 6);
+      if (d > R - 12) { sx *= (R - 12) / d; sy *= (R - 12) / d; }
+      g.fillStyle = `rgba(61,255,122,${pulse})`;
+      g.beginPath(); g.moveTo(R + sx, R + sy - 7); g.lineTo(R + sx + 6, R + sy); g.lineTo(R + sx, R + sy + 7); g.lineTo(R + sx - 6, R + sy); g.closePath(); g.fill();
+      this.hud.setDistance(`OBJECTIVE ${Math.round(Math.hypot(tp.x - this.pos.x, tp.z - this.pos.z))}m`);
+    } else this.hud.setDistance('');
+    // player
+    g.fillStyle = '#ffffff';
+    g.beginPath(); g.moveTo(R, R - 7); g.lineTo(R + 5, R + 5); g.lineTo(R, R + 2); g.lineTo(R - 5, R + 5); g.closePath(); g.fill();
+    if (this.filter !== 'off') {
+      g.fillStyle = this.filter === 'Z' ? 'rgba(255,179,71,0.18)' : 'rgba(61,232,255,0.18)';
+      g.beginPath(); g.moveTo(R, R); g.arc(R, R, LIGHT_RANGE * K, -Math.PI / 2 - LIGHT_HALF_ANGLE, -Math.PI / 2 + LIGHT_HALF_ANGLE); g.closePath(); g.fill();
+    }
   }
 
   private inspect(): string | null {

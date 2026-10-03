@@ -84,12 +84,18 @@ export class RiggedZombie implements ZombieRig {
   private flash = 0;
   private phase = Math.random() * 10;
   private rising = 0;
+  private head: THREE.Object3D | null = null;
+  private twitch = 0;
+  private twitchT = Math.random() * 3;
+  private twitchAxis = new THREE.Vector3();
 
   constructor(model: ZombieModel, seed: number) {
     const body = cloneSkinned(model.scene);
     body.scale.multiplyScalar(model.scale);
     this.root.add(body);
-    const tint = new THREE.Color().setHSL(0.25 + ((seed * 13) % 7) / 100, 0.15, 0.55 + ((seed * 7) % 5) / 40);
+    // sickly, desaturated, darker than the cartoon originals
+    const tint = new THREE.Color().setHSL(0.22 + ((seed * 13) % 7) / 100, 0.22, 0.32 + ((seed * 7) % 5) / 50);
+    body.scale.multiplyScalar(1 + ((seed * 17) % 10) / 70);
     body.traverse(o => {
       const m = o as THREE.Mesh;
       if (!m.isMesh) return;
@@ -97,15 +103,17 @@ export class RiggedZombie implements ZombieRig {
       const mat = src.clone();
       mat.color.multiply(tint);
       mat.transparent = true;
-      mat.roughness = 0.9;
+      mat.roughness = 0.95;
+      mat.metalness = 0;
       m.material = mat;
       this.mats.push(mat);
     });
     // glowing eyes on the head bone
-    const head = model.headBone ? body.getObjectByName(model.headBone) : null;
+    const head = model.headBone ? body.getObjectByName(model.headBone) ?? null : null;
+    this.head = head;
     for (const x of [-1, 1]) {
       const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: eyeTex, color: COLORS.alive, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true }));
-      s.scale.setScalar(0.11);
+      s.scale.setScalar(0.17);
       if (head) {
         // head bone space is scaled by the armature (×100 in these files) and the model scale
         const wsScale = new THREE.Vector3();
@@ -178,6 +186,19 @@ export class RiggedZombie implements ZombieRig {
       else this.play(speed > 0.2 ? 'walk' : 'idle', 0.3, 0.55);
     }
     this.mixer.update(dt);
+    // twitchy, broken-neck head jerks on top of the animation
+    if (this.head && state !== 'dead') {
+      this.twitchT -= dt;
+      if (this.twitchT <= 0) {
+        this.twitchT = 0.4 + Math.random() * (state === 'alive' ? 1.2 : 2.5);
+        this.twitch = 0.5 + Math.random() * 0.5;
+        this.twitchAxis.set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize();
+      }
+      this.twitch = Math.max(0, this.twitch - dt * 4);
+      const lean = state === 'alive' ? 0.25 : 0.45;
+      this.head.rotateZ(Math.sin(time * 0.7 + this.phase) * lean * 0.5);
+      if (this.twitch > 0) this.head.rotateOnAxis(this.twitchAxis, this.twitch * 0.6);
+    }
 
     const undecided = state === 'plus' || state === 'minus' || state === 'other';
     const tint = state === 'minus' ? COLORS.minus : COLORS.plus;

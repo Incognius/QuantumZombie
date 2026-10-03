@@ -86,7 +86,7 @@ kbd { display: inline-block; min-width: 24px; padding: 2px 7px; border: 1px soli
 .story-chapter { font-size: 12px; letter-spacing: 0.4em; color: var(--blood-hi); }
 .story-title { font-family: 'Bebas Neue', sans-serif; font-weight: 400; font-size: clamp(56px, 9vw, 100px); margin: 4px 0 0; line-height: 0.9; }
 .story-place { font-family: 'Special Elite', monospace; color: var(--dim); margin: 8px 0 28px; }
-.story-text { font-family: 'Special Elite', monospace; font-size: 18px; line-height: 1.75; min-height: 210px; color: #cfc9bd; }
+.story-text { font-family: 'Special Elite', monospace; font-size: 17px; line-height: 1.7; min-height: 120px; color: #cfc9bd; }
 .story-text p { margin: 0 0 14px; }
 .caret { animation: blink 0.9s steps(1) infinite; color: var(--blood-hi); }
 @keyframes blink { 50% { opacity: 0; } }
@@ -188,3 +188,16 @@ kbd { display: inline-block; min-width: 24px; padding: 2px 7px; border: 1px soli
   .guide { grid-template-columns: 1fr; }
   .badge { min-width: 0; }
 }
+
+.minimap { position: absolute; top: 20px; right: 22px; width: 180px; height: 180px; border-radius: 50%; overflow: hidden; border: 1px solid #3a3530;
+  background: rgba(0, 0, 0, 0.55); box-shadow: 0 0 30px rgba(0, 0, 0, 0.8); }
+.minimap canvas { display: block; }
+.mini-n { display: none; }
+.mini-dist { position: absolute; bottom: 14px; left: 0; right: 0; text-align: center; font-size: 11px; letter-spacing: 0.15em; color: #3dff7a; text-shadow: 0 0 4px #000; }
+.concept { margin-top: 26px; border: 1px solid #2a2622; border-left: 3px solid var(--blood-hi); background: rgba(20, 6, 6, 0.55); padding: 16px 20px; text-align: left; }
+.concept h3 { font-family: 'Bebas Neue', sans-serif; font-weight: 400; font-size: 26px; letter-spacing: 0.08em; margin: 0 0 8px; }
+.concept h3 small { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.3em; color: var(--blood-hi); display: block; }
+.concept li { font-size: 14px; line-height: 1.6; color: #cfc9bd; margin-bottom: 6px; }
+.concept ul { margin: 0; padding-left: 18px; }
+.overlay.scroll { overflow-y: auto; align-items: flex-start; }
+.overlay.scroll .story { margin: auto 0; padding: 24px 0; }

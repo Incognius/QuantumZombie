@@ -151,8 +151,9 @@ function intro(m: Mission): void {
       <h2 class="story-title">${m.name}</h2>
       <div class="story-place">${m.place}</div>
       <div class="story-text" data-text></div>
+      <div class="concept"><h3><small>BEFORE YOU GO IN</small>${m.concept.title}</h3><ul>${m.concept.points.map(p => `<li>${p}</li>`).join('')}</ul></div>
       <div class="story-actions"><button class="primary" data-go>Enter</button><button class="ghost" data-skip>Skip text</button></div>
-    </div>`, 'story-bg');
+    </div>`, 'story-bg scroll');
   let finished = false;
   const skip = typewriter(m.intro, overlay.querySelector('[data-text]')!, () => { finished = true; overlay.querySelector('[data-skip]')?.remove(); });
   on('[data-skip]', () => { if (!finished) skip(); });

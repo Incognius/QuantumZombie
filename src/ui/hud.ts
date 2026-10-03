@@ -75,6 +75,7 @@ export class Hud {
       <div class="radio" data-k="radio"></div>
       <div class="inspector" data-k="inspector"></div>
       <div class="prompt" data-k="prompt"></div>
+      <div class="minimap"><canvas width="180" height="180" data-k="mini"></canvas><div class="mini-n">N</div><div class="mini-dist" data-k="miniDist"></div></div>
       <div class="guide-wrap" data-k="guide">${FIELD_GUIDE}<div class="guide-foot">hold TAB</div></div>
       <div class="bl">
         <div class="hp"><svg viewBox="0 0 24 24" class="ic"><path d="M10 3h4v7h7v4h-7v7h-4v-7H3v-4h7z"/></svg><span data-k="hpNum"></span><div class="bar"><div data-k="hpFill"></div></div></div>
@@ -155,6 +156,9 @@ export class Hud {
     this.radioShown = 0;
     this.radioTimer = 4 + text.length / 22;
   }
+
+  get minimap(): HTMLCanvasElement { return this.els.mini as HTMLCanvasElement; }
+  setDistance(text: string): void { this.set('miniDist', text); }
 
   guide(show: boolean): void { this.style('guide', 'opacity', show ? '1' : '0'); }
 
