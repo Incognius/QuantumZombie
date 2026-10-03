@@ -4,7 +4,7 @@
 
 A story-driven horror FPS in the browser. Your flashlight is a quantum measurement. On the night of the Harlow Incident, the dead in your city are neither dead nor alive until something looks at them. The **amber** filter asks every body *"dead or alive?"* (a Z-basis measurement). The **cyan** filter asks a different question, and it's the only light that can read the cyan-coded door locks (an X-basis measurement). But a corpse touched by cyan forgets it was ever dead.
 
-▶ **Play:** https://incognius.github.io/dead-reckoning/ (desktop browser, mouse + keyboard)
+▶ **Play:** https://incognius.github.io/QuantumZombie/ (desktop browser, mouse + keyboard)
 
 ## The story: five chapters out of the city
 
