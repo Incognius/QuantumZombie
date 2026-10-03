@@ -340,3 +340,84 @@ export function makePickup(kind: 'med' | 'ammo'): THREE.Group {
   l.position.y = 0.6; g.add(l);
   return g;
 }
+
+// ---------------------------------------------------------------- floodlights, helicopter, blood
+export function makeLamp(basis: 'Z' | 'X'): { group: THREE.Group; light: THREE.SpotLight; setOn(on: boolean): void } {
+  const col = basis === 'Z' ? COLORS.amber : COLORS.cyan;
+  const g = new THREE.Group();
+  const metal = new THREE.MeshStandardMaterial({ color: 0x2a2d31, roughness: 0.6, metalness: 0.5 });
+  g.add(part(metal, 0.12, 4.6, 0.12, 0, 2.3, 0));
+  g.add(part(metal, 0.9, 0.12, 0.12, 0.4, 4.55, 0));
+  const lensMat = new THREE.MeshBasicMaterial({ color: 0x222222 });
+  const lens = part(lensMat, 0.5, 0.12, 0.5, 0.8, 4.45, 0);
+  g.add(lens);
+  const box = part(new THREE.MeshStandardMaterial({ color: 0x3a3f44, emissive: col, emissiveIntensity: 0.25 }), 0.3, 0.4, 0.15, 0, 1.2, 0.12);
+  g.add(box);
+  const light = new THREE.SpotLight(col, 0, 16, 0.95, 0.5, 1.2);
+  light.position.set(0.8, 4.4, 0);
+  light.target.position.set(0.8, 0, 0);
+  g.add(light, light.target);
+  const cone = new THREE.Mesh(
+    new THREE.ConeGeometry(3.6, 4.4, 24, 1, true),
+    new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.06, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }),
+  );
+  cone.position.set(0.8, 2.2, 0);
+  g.add(cone);
+  return {
+    group: g, light,
+    setOn(on: boolean) {
+      light.intensity = on ? 70 : 0;
+      lensMat.color.setHex(on ? col : 0x222222);
+      cone.visible = on;
+    },
+  };
+}
+
+export function makeHeli(): THREE.Group {
+  const g = new THREE.Group();
+  const body = new THREE.MeshStandardMaterial({ color: 0xd8d8d0, roughness: 0.5, metalness: 0.3 });
+  const red = new THREE.MeshStandardMaterial({ color: 0xb01818, roughness: 0.6 });
+  const glass = new THREE.MeshStandardMaterial({ color: 0x223344, roughness: 0.1, metalness: 0.8 });
+  g.add(part(body, 2.2, 1.7, 4.2, 0, 1.4, 0));
+  g.add(part(glass, 2.0, 1.0, 1.0, 0, 1.7, -2.2));
+  g.add(part(red, 2.25, 0.3, 4.25, 0, 1.0, 0));
+  g.add(part(body, 0.5, 0.5, 4.5, 0, 1.8, 4.2));
+  g.add(part(red, 0.12, 1.4, 0.8, 0, 2.4, 6.3));
+  g.add(part(body, 0.15, 0.15, 3.8, -0.9, 0.2, 0), part(body, 0.15, 0.15, 3.8, 0.9, 0.2, 0));
+  const rotor = new THREE.Group();
+  rotor.name = 'rotor';
+  rotor.add(part(new THREE.MeshStandardMaterial({ color: 0x222222 }), 11, 0.06, 0.35, 0, 0, 0), part(new THREE.MeshStandardMaterial({ color: 0x222222 }), 0.35, 0.06, 11, 0, 0, 0));
+  rotor.position.y = 2.45;
+  g.add(rotor);
+  const beacon = new THREE.PointLight(0xff2020, 6, 14, 1.5);
+  beacon.position.set(0, 3, 0);
+  g.add(beacon);
+  const spot = new THREE.SpotLight(0xffffff, 120, 40, 0.5, 0.4, 1);
+  spot.position.set(0, 0.5, -2);
+  spot.target.position.set(0, -10, -4);
+  g.add(spot, spot.target);
+  return g;
+}
+
+const bloodTex = (() => {
+  const c = document.createElement('canvas');
+  c.width = c.height = 128;
+  const g = c.getContext('2d')!;
+  for (let i = 0; i < 14; i++) {
+    g.fillStyle = `rgba(${70 + Math.random() * 40},0,0,${0.35 + Math.random() * 0.4})`;
+    g.beginPath();
+    g.ellipse(64 + (Math.random() - 0.5) * 60, 64 + (Math.random() - 0.5) * 60, 6 + Math.random() * 26, 4 + Math.random() * 16, Math.random() * 3, 0, Math.PI * 2);
+    g.fill();
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+})();
+
+export function makeBlood(): THREE.Mesh {
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 2.2), new THREE.MeshStandardMaterial({ map: bloodTex, transparent: true, depthWrite: false, roughness: 0.3 }));
+  m.rotation.x = -Math.PI / 2;
+  m.rotation.z = Math.random() * Math.PI * 2;
+  m.position.y = 0.015;
+  return m;
+}

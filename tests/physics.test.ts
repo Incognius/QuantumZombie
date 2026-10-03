@@ -3,7 +3,7 @@ import { ALIVE, DEAD, MINUS, PLUS, amplitudes, eigen, measure, probPositive } fr
 import { seededRandom } from '../src/quantum/random';
 import { bulletHit, contact, isIntact, kill, lightTarget, lightTerminal, makeTerminal, reencode } from '../src/game/rules';
 import { Grid, cellOf, flowField, parseMap } from '../src/game/grid';
-import { LEVELS } from '../src/levels';
+import { MISSIONS } from '../src/levels';
 
 const N = 20000;
 const within = (x: number, p: number, n = N) => Math.abs(x / n - p) < 4 * Math.sqrt((p * (1 - p)) / n) + 1e-9;
@@ -110,20 +110,27 @@ describe('game rules', () => {
   });
 });
 
-describe('levels', () => {
-  for (const level of LEVELS) {
-    it(`${level.name}: every floor tile, terminal and exit is reachable`, () => {
-      const m = parseMap(level.map);
-      // treat doors as open for reachability
+describe('missions', () => {
+  for (const ms of MISSIONS) {
+    it(`${ms.name}: map matches its definition and everything is reachable`, () => {
+      const m = parseMap(ms.map);
       const open = m.solid.slice();
       for (const d of m.doors) open[d.y * m.w + d.x] = 0;
       const grid = new Grid(m.w, m.h, open);
       const dist = flowField(grid, cellOf(m.start));
-      for (let i = 0; i < open.length; i++) if (!open[i]) expect(dist[i], `tile ${i % m.w},${(i / m.w) | 0}`).toBeGreaterThanOrEqual(0);
-      expect(m.exits.length).toBeGreaterThan(0);
-      expect(m.spawners.length).toBeGreaterThan(0);
-      if (level.kind !== 'extract') expect(m.terminals.length).toBe(1);
-      if (level.kind === 'code') expect(m.doors.length).toBeGreaterThan(0);
+      for (let i = 0; i < open.length; i++) if (!open[i]) expect(dist[i], `${ms.name} tile ${i % m.w},${(i / m.w) | 0}`).toBeGreaterThanOrEqual(0);
+      expect(m.exits.length).toBe(1);
+      expect(m.terminals.filter(Boolean).length).toBe(ms.terminals.length);
+      expect(m.doors.length).toBe(ms.doors.length);
+      expect(m.lamps.length).toBe(ms.lamps.length);
+      m.lamps.forEach((l, i) => expect(l.basis, `${ms.name} lamp ${i}`).toBe(ms.lamps[i]!.basis));
+      // every terminal has an open face to read it from
+      for (const t of m.terminals) {
+        const c = cellOf(t);
+        expect([[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => dist[(c.y + dy!) * m.w + c.x + dx!]! >= 0), `${ms.name} terminal face`).toBe(true);
+      }
+      for (const k of ['a', 'b']) if (JSON.stringify(ms.steps.map(s => s.done.toString())).includes(`'${k}'`)) expect(m.markers[k], `${ms.name} marker ${k}`).toBeTruthy();
+      if (ms.spawn.cap > 0) expect(m.spawners.length).toBeGreaterThan(0);
     });
   }
 });

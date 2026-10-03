@@ -4,6 +4,7 @@ export class Sfx {
   private master: GainNode | null = null;
   private noiseBuf: AudioBuffer | null = null;
   muted = false;
+  get context(): AudioContext | null { return this.ctx; }
 
   unlock(): void {
     if (this.ctx) { void this.ctx.resume(); return; }

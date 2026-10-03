@@ -7,17 +7,19 @@ export interface Point { x: number; z: number }
 export interface ParsedMap {
   w: number;
   h: number;
-  solid: Uint8Array; // 1 = wall or closed door
+  solid: Uint8Array; // 1 = wall, closed door or terminal
   start: Point;
   spawners: Point[];
   corpses: Point[];
   plus: Point[];
   minus: Point[];
-  terminals: Point[];
-  doors: Cell[];
+  runners: Point[];
+  terminals: Point[]; // index = digit - 1
+  doors: Cell[];      // reading order
+  lamps: { pos: Point; basis: 'Z' | 'X' }[]; // reading order
   exits: Point[];
   medkits: Point[];
-  ammo: Point[];
+  markers: Record<string, Point>;
 }
 
 export const center = (c: Cell): Point => ({ x: (c.x + 0.5) * TILE, z: (c.y + 0.5) * TILE });
@@ -28,8 +30,8 @@ export function parseMap(rows: readonly string[]): ParsedMap {
   const w = Math.max(...rows.map(r => r.length));
   const solid = new Uint8Array(w * h);
   const m: ParsedMap = {
-    w, h, solid, start: { x: TILE, z: TILE }, spawners: [], corpses: [], plus: [], minus: [],
-    terminals: [], doors: [], exits: [], medkits: [], ammo: [],
+    w, h, solid, start: { x: TILE, z: TILE }, spawners: [], corpses: [], plus: [], minus: [], runners: [],
+    terminals: [], doors: [], lamps: [], exits: [], medkits: [], markers: {},
   };
   for (let y = 0; y < h; y++) {
     for (let x = 0; x < w; x++) {
@@ -37,17 +39,20 @@ export function parseMap(rows: readonly string[]): ParsedMap {
       const p = center({ x, y });
       const edge = x === 0 || y === 0 || x === w - 1 || y === h - 1;
       if (ch === '#' || ch === ' ' || edge) { solid[y * w + x] = 1; continue; }
+      if (ch >= '1' && ch <= '9') { m.terminals[Number(ch) - 1] = p; solid[y * w + x] = 1; continue; }
+      if (ch >= 'a' && ch <= 'z') { m.markers[ch] = p; continue; }
       switch (ch) {
         case 'P': m.start = p; break;
         case 'S': m.spawners.push(p); break;
         case 'C': m.corpses.push(p); break;
         case 'U': m.plus.push(p); break;
         case 'V': m.minus.push(p); break;
-        case 'T': m.terminals.push(p); solid[y * w + x] = 1; break;
+        case 'R': m.runners.push(p); break;
         case 'D': m.doors.push({ x, y }); solid[y * w + x] = 1; break;
+        case 'L': m.lamps.push({ pos: p, basis: 'Z' }); break;
+        case 'K': m.lamps.push({ pos: p, basis: 'X' }); break;
         case 'E': m.exits.push(p); break;
         case 'M': m.medkits.push(p); break;
-        case 'A': m.ammo.push(p); break;
       }
     }
   }

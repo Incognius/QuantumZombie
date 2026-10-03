@@ -2,9 +2,19 @@
 
 **Quriosity 2026 · Track 1: Basis switching & measurement scrambling**
 
-A browser FPS where your flashlight is a quantum measurement. Hordes of zombies shamble out of the dark, and every body is a qubit. The **amber** light asks *"dead or alive?"* (the Z basis). The **cyan** light asks a different question, *"◯ or ◇?"* (the X basis). Ask the wrong question and the answer you already had is gone: corpses get back up, and codes turn to noise.
+A story-driven horror FPS in the browser. Your flashlight is a quantum measurement. On the night of the Harlow Incident, the dead in your city are neither dead nor alive until something looks at them. The **amber** filter asks every body *"dead or alive?"* (a Z-basis measurement). The **cyan** filter asks a different question, and it's the only light that can read the cyan-coded door locks (an X-basis measurement). But a corpse touched by cyan forgets it was ever dead.
 
 ▶ **Play:** https://incognius.github.io/dead-reckoning/ (desktop browser, mouse + keyboard)
+
+## The story: five chapters out of the city
+
+| | Chapter | Puzzle |
+|---|---|---|
+| Prologue | **The Basement** (home) | Guided tutorial. Dr. Varga talks you through every rule over the radio, one step at a time. |
+| I | **Maple Street** | An amber streetlight makes a whole crowd decide at once. The garage code is in a house full of corpses. |
+| II | **St. Lucy's Hospital** | The evac lift needs a two-part code. Half of it is in Ward A, half in a morgue packed with bodies. |
+| III | **Harlow International** | Security gate, baggage hall, tarmac. Opening the tarmac doors powers up the **cyan runway lights**, which raise every corpse outside. Switch them off or counter them with the amber floodlight. |
+| IV | **Medevac** | Hold cyan on the radio beacon for 35 s while the bodies around it get up, then board the helicopter. |
 
 ## How to play
 
@@ -12,15 +22,20 @@ A browser FPS where your flashlight is a quantum measurement. Hordes of zombies 
 |---|---|
 | `W A S D` / `Shift` / `Space` | move / sprint / jump |
 | `LMB` / `RMB` | fire / aim down sights (the Marksman scopes) |
-| `R` · `1` `2` / `Q` | reload · switch Carbine ⇄ Marksman |
-| `Z` | **amber** light (measures in Z) |
-| `X` | **cyan** light (measures in X) |
-| `F` | light off · `E` use |
+| `R` · `1` `2` / `Q` | reload · switch Carbine ⇄ Marksman (ammo is unlimited) |
+| `Z` / `X` / `F` | **amber** light / **cyan** light / light off |
+| `E` | use: enter a code, flip a floodlight |
+| `Tab` | field guide · `Esc` pause |
 
-**Missions**
-1. **Lights Out.** Learn the two lights. Amber drops about half of an undecided pack and wakes up the other half.
-2. **Don't Look Back.** The extraction door's code is stored in cyan on a terminal at the end of a hall full of corpses. Cyan reads the code but raises the dead. Amber keeps the dead down but scrambles the code.
-3. **Last Signal.** Hold cyan on an uplink for 45 s while the horde comes from every side and the corpses pile up around the terminal.
+**The three kinds of bodies:**
+- **DEAD:** lying on the floor.
+- **UNDECIDED:** flickering, see-through, and slow.
+- **ALIVE:** solid, with red eyes. Shoot these.
+
+**Rules of thumb:**
+- Walk through the dead under amber.
+- Use cyan only on code screens, up close, aimed away from bodies.
+- Never point amber at a code screen.
 
 ## The physics (exact)
 
@@ -36,8 +51,8 @@ Measurement follows the Born rule: P = cos²((θ − φ)/2), where φ = 0 for Z 
 
 | Event | What it is physically |
 |---|---|
-| amber cone (with line of sight) on a body or screen | Z measurement, every tick (repeating it changes nothing) |
-| cyan cone on a body or screen | X measurement, every tick |
+| amber cone or amber floodlight (with line of sight) on a body or screen | Z measurement, every tick (repeating it changes nothing) |
+| cyan cone or cyan floodlight on a body or screen | X measurement, every tick |
 | bullet hits a body | Z measurement: damage only if the answer is ALIVE |
 | shambler touches you | Z measurement: ALIVE bites, DEAD drops |
 | ALIVE body's HP reaches 0 | classical kill → reset to \|0⟩ |
@@ -74,6 +89,11 @@ npm test        # physics + level tests
 npm run build
 ```
 
-Add `?debug&level=2` to the URL for a scripting hook (`window.__dr`) that steps the simulation without pointer lock.
+Add `?debug&m=2` to the URL (chapter index 0–4) for a scripting hook (`window.__dr`) that steps the simulation without pointer lock.
 
-Built with TypeScript, three.js and Vite. All art is procedural and all sound is synthesized with WebAudio.
+Built with TypeScript, three.js and Vite. The horror score and all sound effects are generated live with WebAudio.
+
+## Credits
+
+- Zombie models by **Quaternius** (quaternius.com), via Poly Pizza: [Zombie](https://poly.pizza/m/VlXjG0N8Eg) (CC0), [Zombie](https://poly.pizza/m/JoBvxIUpZP) (CC0), [Zombie](https://poly.pizza/m/22K0aSZkHV) (CC-BY 3.0).
+- Everything else (level art, weapons, terminals, music, sound) is procedural.
