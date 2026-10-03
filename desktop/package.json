@@ -1,0 +1,26 @@
+{
+  "name": "dead-reckoning-desktop",
+  "productName": "Dead Reckoning",
+  "version": "1.0.0",
+  "description": "A quantum zombie FPS: your flashlight is a measurement in the Z or X basis.",
+  "author": "The Superposed",
+  "private": true,
+  "main": "main.cjs",
+  "scripts": {
+    "web": "cd .. && npm run typecheck && npx vite build --base=./ --outDir desktop/app --emptyOutDir",
+    "start": "npm run web && electron .",
+    "dist": "npm run web && electron-builder --win portable"
+  },
+  "devDependencies": {
+    "electron": "44.5.1",
+    "electron-builder": "26.15.3"
+  },
+  "build": {
+    "appId": "dev.superposed.deadreckoning",
+    "productName": "Dead Reckoning",
+    "files": ["main.cjs", "app/**/*"],
+    "directories": { "output": "release" },
+    "win": { "target": "portable", "signAndEditExecutable": false },
+    "portable": { "artifactName": "DeadReckoning.exe" }
+  }
+}

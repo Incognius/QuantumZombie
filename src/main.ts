@@ -8,6 +8,7 @@ import type { ZombieModel } from './engine/zombieModels';
 import { ENDING, MISSIONS } from './levels';
 import type { Mission } from './levels';
 import { FIELD_GUIDE } from './ui/hud';
+import { runLesson } from './ui/lesson';
 
 const params = new URLSearchParams(location.search);
 const debug = params.has('debug');
@@ -62,6 +63,7 @@ function title(): void {
       <nav class="menu">
         ${unlocked > 0 ? `<button class="mi" data-continue><span>Continue</span><em>${cont.chapter} — ${cont.name}</em></button>` : ''}
         <button class="mi" data-new><span>${unlocked > 0 ? 'New game' : 'Begin'}</span><em>Prologue — The Basement</em></button>
+        <button class="mi" data-lesson><span>Orientation</span><em>the interactive lesson</em></button>
         <button class="mi" data-chapters><span>Chapters</span></button>
         <button class="mi" data-guide><span>Field guide</span></button>
         <button class="mi" data-controls><span>Controls</span></button>
@@ -70,8 +72,9 @@ function title(): void {
       </nav>
       <div class="corner">Quriosity 2026 · Track 1 — basis switching &amp; measurement</div>
     </div>`, 'menu-bg');
-  on('[data-continue]', () => intro(cont));
-  on('[data-new]', () => intro(MISSIONS[0]!));
+  on('[data-continue]', () => (store.get('lesson', 0) ? intro(cont) : lesson()));
+  on('[data-new]', lesson);
+  on('[data-lesson]', lesson);
   on('[data-chapters]', chapters);
   on('[data-guide]', () => page('Field guide', FIELD_GUIDE));
   on('[data-controls]', () => page('Controls', CONTROLS));
@@ -99,6 +102,16 @@ const CREDITS = `
     <p><b>Physics</b> — every outcome you see is a real Born-rule measurement of a qubit, in the Z basis (amber) or the X basis (cyan).</p>
   </div>`;
 
+function lesson(): void {
+  destroyGame();
+  music.setMode('menu');
+  show('<div class="lesson-root"></div>', 'story-bg scroll');
+  runLesson(overlay.querySelector('.lesson-root')!, () => { store.set('lesson', 1); intro(MISSIONS[0]!); }, k => {
+    if (k === 'click') sfx.click(); else if (k === 'revive') sfx.revive(); else if (k === 'collapse') sfx.collapse();
+    else if (k === 'charge') sfx.charge(); else if (k === 'good') sfx.good(); else sfx.bad();
+  });
+}
+
 function page(name: string, body: string): void {
   show(`<div class="page"><div class="page-head"><h2>${name}</h2><button class="back" data-back>Back</button></div>${body}</div>`, 'menu-bg');
   on('[data-back]', title);
@@ -113,7 +126,7 @@ function chapters(): void {
   on('[data-back]', title);
   on('[data-m]', el => {
     const m = MISSIONS[Number(el.dataset.m)]!;
-    if (m.id <= unlocked || debug) intro(m);
+    if (m.id <= unlocked || debug) (store.get('lesson', 0) || debug ? intro(m) : lesson());
   });
 }
 

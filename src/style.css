@@ -201,3 +201,44 @@ kbd { display: inline-block; min-width: 24px; padding: 2px 7px; border: 1px soli
 .concept ul { margin: 0; padding-left: 18px; }
 .overlay.scroll { overflow-y: auto; align-items: flex-start; }
 .overlay.scroll .story { margin: auto 0; padding: 24px 0; }
+
+/* orientation lesson */
+.lesson-root { width: min(1000px, 100%); margin: auto 0; padding: 20px 0; }
+.lesson .kicker { font-size: 11px; letter-spacing: 0.35em; color: var(--blood-hi); }
+.lesson h2 { font-family: 'Bebas Neue', sans-serif; font-weight: 400; font-size: 48px; margin: 2px 0 18px; letter-spacing: 0.04em; }
+.lesson-body { display: grid; grid-template-columns: 1fr 1.1fr; gap: 30px; align-items: start; }
+.lesson-stage { border: 1px solid #2a2622; background: rgba(10, 8, 8, 0.8); padding: 18px; text-align: center; }
+.specimen svg { width: 140px; height: 190px; }
+.specimen .fig { fill: #6a7060; transition: transform 0.4s, opacity 0.2s; transform-origin: 50px 130px; }
+.specimen .eye { fill: #111; }
+.s-alive .fig { fill: #3c4237; } .s-alive .eye { fill: #ff2a2a; filter: drop-shadow(0 0 4px #ff2a2a); }
+.s-alive .arm { transform: rotate(-70deg); transform-box: fill-box; transform-origin: top; }
+.s-dead .fig { transform: rotate(-90deg) translate(-10px, 30px); fill: #3a3530; }
+.s-plus .fig, .s-minus .fig { animation: flick2 0.25s steps(2) infinite; }
+.s-plus .fig { fill: var(--plus); } .s-minus .fig { fill: var(--minus); }
+.s-plus .eye, .s-minus .eye { fill: #fff; }
+@keyframes flick2 { 50% { opacity: 0.35; } }
+.sp-label { font-family: 'Bebas Neue', sans-serif; font-size: 30px; letter-spacing: 0.06em; }
+.s-alive .sp-label { color: var(--blood-hi); } .s-plus .sp-label { color: var(--plus); } .s-minus .sp-label { color: var(--minus); }
+.sp-sub { font-size: 12px; color: var(--dim); }
+.lesson-keys { display: flex; justify-content: center; gap: 10px; margin: 16px 0 10px; flex-wrap: wrap; }
+.lk { all: unset; cursor: pointer; padding: 8px 14px; border: 1px solid #4a443c; font-size: 13px; letter-spacing: 0.06em; }
+.lk.amber { color: var(--amber); border-color: var(--amber); } .lk.cyan { color: var(--cyan); border-color: var(--cyan); }
+.lk:hover { background: rgba(255, 255, 255, 0.06); }
+.lesson-log { min-height: 20px; font-size: 12px; letter-spacing: 0.05em; }
+.tasks { margin: 0; padding-left: 22px; }
+.tasks li { font-size: 15px; line-height: 1.6; margin-bottom: 14px; color: #cfc9bd; }
+.tasks li.done { color: #6f8f6f; text-decoration: line-through; text-decoration-color: rgba(111, 143, 111, 0.5); }
+.tasks li.done::marker { content: '✓  '; color: #3dff7a; }
+.lesson-foot { margin-top: 22px; display: flex; justify-content: flex-end; align-items: center; }
+.muted { color: var(--dim); font-size: 12px; }
+.codepanel { padding: 22px; } .cp-label { font-size: 11px; letter-spacing: 0.2em; color: var(--dim); }
+.cp-screen { margin-top: 14px; font-size: 44px; letter-spacing: 0.2em; min-height: 60px; background: #05080a; border: 1px solid #1f2a30; padding: 14px; }
+.codepanel.bad .cp-screen { border-color: #ff5544; }
+.fg { width: 100%; border-collapse: collapse; }
+.fg td { padding: 10px 12px; border-bottom: 1px solid #1d1a17; font-size: 14px; line-height: 1.6; vertical-align: top; color: #cfc9bd; }
+.fg td:first-child { width: 120px; text-align: right; white-space: nowrap; }
+.ack { display: flex; gap: 10px; align-items: center; margin-top: 18px; font-size: 14px; cursor: pointer; }
+.ack input { accent-color: var(--blood-hi); width: 18px; height: 18px; }
+.primary:disabled { opacity: 0.3; cursor: not-allowed; }
+@media (max-width: 760px) { .lesson-body { grid-template-columns: 1fr; } }
