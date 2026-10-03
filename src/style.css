@@ -26,7 +26,7 @@ button { font-family: inherit; }
   animation: grain 0.6s steps(4) infinite; }
 
 /* ---------- overlay screens ---------- */
-.overlay { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 20; padding: 16px; overflow: hidden; }
+.overlay { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 20; padding: 16px; overflow: clip; }
 .overlay.menu-bg { background: radial-gradient(ellipse at 30% 40%, rgba(80, 8, 10, 0.35), transparent 55%), radial-gradient(ellipse at 70% 80%, rgba(10, 40, 50, 0.25), transparent 60%), #030303; }
 .overlay.menu-bg::after { content: ''; position: absolute; inset: 0; pointer-events: none;
   background: radial-gradient(ellipse at 50% 50%, transparent 30%, rgba(0,0,0,0.9) 100%); }
@@ -110,17 +110,17 @@ kbd { display: inline-block; min-width: 24px; padding: 2px 7px; border: 1px soli
 /* field guide (menu page, pause, Tab overlay) */
 .guide { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; text-align: left; }
 .guide h4 { font-family: 'Bebas Neue', sans-serif; font-weight: 400; font-size: 24px; letter-spacing: 0.08em; margin: 0 0 10px; color: var(--blood-hi); }
-.gl { font-size: 13px; line-height: 1.6; margin-bottom: 12px; color: #c2bcb0; display: flex; gap: 10px; align-items: flex-start; }
+.gl { font-size: 13px; line-height: 1.6; margin-bottom: 12px; color: #c2bcb0; position: relative; padding-left: 34px; }
 .gl b { color: var(--ink); }
-.sw { flex: none; width: 14px; height: 14px; margin-top: 3px; border-radius: 2px; }
+.sw { position: absolute; left: 4px; top: 4px; width: 14px; height: 14px; border-radius: 2px; }
 .sw-dead { background: #3a3530; }
 .sw-und { background: linear-gradient(135deg, var(--plus), var(--minus)); opacity: 0.6; }
 .sw-alive { background: var(--blood-hi); box-shadow: 0 0 8px var(--blood-hi); }
-.kb { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border: 1px solid; font-weight: 700; font-size: 13px; }
+.kb { position: absolute; left: 0; top: 0; display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border: 1px solid; font-weight: 700; font-size: 13px; }
 .kb.k-amber { color: var(--amber); } .kb.k-cyan { color: var(--cyan); }
 
 /* ---------- in-game HUD ---------- */
-.hud { position: fixed; inset: 0; pointer-events: none; z-index: 10; font-size: 13px; overflow: hidden; }
+.hud { position: fixed; inset: 0; pointer-events: none; z-index: 10; font-size: 13px; overflow: clip; }
 .vignette-static { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 50%, transparent 45%, rgba(0, 0, 0, 0.75) 100%); }
 .danger { position: absolute; inset: 0; opacity: 0; box-shadow: inset 0 0 220px 40px rgba(150, 0, 0, 0.6); animation: pulse 1.1s ease-in-out infinite; transition: opacity 0.5s; }
 @keyframes pulse { 50% { box-shadow: inset 0 0 160px 20px rgba(150, 0, 0, 0.3); } }
