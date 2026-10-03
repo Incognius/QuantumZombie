@@ -361,7 +361,10 @@ export class Game {
 
   requestLock(): void {
     if (this.opts.debug) return;
-    void this.renderer.domElement.requestPointerLock();
+    try {
+      const r = this.renderer.domElement.requestPointerLock() as unknown as Promise<void> | undefined;
+      r?.catch?.(() => { /* not allowed yet (needs a click); the HUD tells the player */ });
+    } catch { /* older browsers throw synchronously */ }
   }
 
   private onKey(code: string): void {
@@ -950,7 +953,7 @@ export class Game {
       hp: this.hp, weapon: w.name, mag: s.mag, magSize: w.magSize, reserve: s.reserve,
       reloading: s.reloadT >= 0 ? s.reloadT / w.reload : -1, filter: this.filter, battery: this.battery,
       objective, timer: `${mm}:${String(ss).padStart(2, '0')}`, inspector: this.inspect(), spread: spreadPx,
-      ads: this.adsT, scoped, prompt, code: this.level.kind === 'code' ? this.knownCode : null, progress, alive: this.liveCount(),
+      ads: this.adsT, scoped, prompt: prompt ?? (this.locked() ? null : 'Click to take control of the mouse'), code: this.level.kind === 'code' ? this.knownCode : null, progress, alive: this.liveCount(),
     };
   }
 
